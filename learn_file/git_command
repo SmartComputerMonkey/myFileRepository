@@ -1,0 +1,9 @@
+1.git add -A，提交到本地缓存，
+2.git commit -m 'description' ，添加备注，
+3.git push origin HEAD:dev/name 推送本地分支到远程 name为名字，
+4.git checkout -b name origin/master ，在本地创建一个name名字的分支，从远程master 进行拉取，
+5.git fetch -vva 拉取远程分支代码更新详情，
+6，git branch -vva 查看本地分支详情 
+7.git branch --set-upstream-to origin/dev/name 当前分支与远程dev下的name名字分支 创建连接 
+8.git branch -d name 删除本地name分支，
+9.git push origin  :dev/name 删除远程分支 dev 下的name名字分支
