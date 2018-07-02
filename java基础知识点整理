@@ -1,0 +1,251 @@
+
+JVM
+
+JVM内存结构     
+堆、栈、方法区、直接内存、堆和栈区别   了解并指导每部分的工作
+
+Java内存模型
+内存可见性、重排序、顺序一致性、volatile、锁、final   了解知悉并深入了解volatile
+
+垃圾回收  
+内存分配策略、垃圾收集器（G1）、GC算法、GC参数、对象存活的判定   了解
+
+JVM参数及调优   不清楚
+
+Java对象模型    不清楚不清晰
+oop-klass、对象头
+
+HotSpot  不知道
+即时编译器、编译优化
+
+类加载机制  了解一部分
+classLoader、类加载过程、双亲委派（破坏双亲委派）、模块化（jboss modules、osgi、jigsaw）
+
+虚拟机性能监控与故障处理工具   不知道
+jps, jstack, jmap、jstat, jconsole, jinfo, jhat, javap, btrace、TProfiler
+
+编译与反编译 不知道
+javac 、javap 、jad 、CRF
+
+Java基础知识
+阅读源代码  没读过
+String、Integer、Long、Enum、BigDecimal、ThreadLocal、ClassLoader & URLClassLoader、ArrayList & LinkedList、 HashMap & LinkedHashMap & TreeMap & CouncurrentHashMap、HashSet & LinkedHashSet & TreeSet
+
+Java中各种变量类型  没看过
+
+熟悉Java String的使用，熟悉String的各种函数   看过
+JDK 6和JDK 7中substring的原理及区别、 不知道
+
+replaceFirst、replaceAll、replace区别：
+					replaceFirst和replaceAll用到了正则表达式
+					replace没有用到正则表达式
+					用一个简单的例子就可以看出效果
+					String str = "my.test.txt";
+					System.out.println(str.replaceFirst(".", "#"));
+					System.out.println(str.replaceAll(".", "#"));
+					System.out.println(str.replace(".", "#"));
+					
+					=================================================
+					输出结果：
+						#y.test.txt
+						###########
+						my#test#txt
+					解释：
+						“.”是正则表达式的元字符，匹配除换行符以外的任意字符，所以replaceAll、replaceFirst才出现了这样的结果。
+						replace没有用到正则表达式，但会把所有“.”替换掉，很多人可能会误解replace是替换单个，而replaceAll是替换全部，其实这是错的（我以前也是这么想的- -）。replace只是没有用到正则表达式，但会替换所有匹配的字符串
+					补充：String的split也是用到了正则表达式，使用的时候注意点
+
+
+String对“+”的重载
+	String str0 = "a";
+	String str1 = str0 + "b";
+	
+	其中“+”反编译出来之后是这样的一个过程
+	String str0 = "a";
+	StringBuilder sb = new StringBuilder();
+	sb.append(str0).append("b");
+	String str1 = sb.toString();
+	中间多出来了一个StringBuilder对象，这是一个临时对象。
+	
+	
+
+String.valueOf和Integer.toString的区别
+通过读String类的源码可以看到：
+	public static String valueOf(int i) {
+    	return Integer.toString(i);
+	}
+	String.valueOf(int i) 其实调用了Integer.toString(int i)方法
+通过看Integer类的toString方法源码可以看到：
+	public static String toString(int i) {
+	    if (i == Integer.MIN_VALUE)
+	        return "-2147483648";
+	    int size = (i < 0) ? stringSize(-i) + 1 : stringSize(i);
+	    char[] buf = new char[size];
+	    getChars(i, size, buf);
+	    return new String(buf, true);
+	}
+	除了当参数i=-2^31时，值返回"-2147483648"外，当i=其他值时，都返回一个新的Stirng对象（new String(buf,true)）
+
+补充注意：
+	java.lang.Object类里已有public方法.toString()，所以对任何严格意义上的java对象都可以调用此方法。但在使用时要注意，必须保证object不是null值，否则将抛出NullPointerException异常
+	String.valueOf 这是一个静态方法，直接通过String调用，可以说是完美，只是平时不习惯这样写而已，这样的实现避免了前面两个的不足和缺点。
+	源码如下：
+		public static String valueOf(Object obj){
+    		return (obj==null) ? "null" : obj.toString()
+		};
+	我们应当注意到，当object为null 时，String.valueOf（object）的值是字符串”null”，而不是null！！！在使用过程中切记要注意。
+
+字符串的不可变性  
+	通过查看String源码可知：
+		/** The value is used for character storage. */
+    	private final char value[];
+    	String类是依赖一个私有字符常量表实现的；
+    	例如：
+    		String c1=new String("abc");
+        	String c2=new String("abc");
+        	String c3=c1;
+        	System.out.println("c1==c2:"+  (c1==c2));
+        	System.out.println("c1.equals(c2):"+c1.equals(c2));
+        	System.out.println("c3==c1:"+(c3==c1));
+        	System.out.println("c1.equals(c3):"+c1.equals(c3));
+        	c1="han";
+        	System.out.println(c1+"   "+c3);
+        	System.out.println(""+(c3==c1));
+        	
+        	第一个输出语句c1==c2很好理解，因为c1和c2都是用new 创建的对象的引用，虽然对象的值相同，但两个对象在不同的内存空间，也就是说c1和c2是对两个不同的对象的引用，所以结果为false。
+        	第二个输出语句c1.equals(c2)是调用了String类的equals方法，该方法用于比较两个字符串对象的值是否相等，所以结果为true。
+        	对于c3==c1为true是因为将c1赋值给了c3 也就是将c1对象的引用赋值给了c3；
+        	对于System.out.println(c1+"   "+c3)，这个输出语句有人会问既然c1和c3引用的是同一个对象，为什么改变c1的值c3的值并不会改变呢？
+			
+			这就涉及到了Java中String对象的不可变性，什么叫不可变性呢，简单的说就是一旦一个String对象被创建并被赋值（初始化）这个对象的值就不会变化。
+			一旦一个String对象在内存中创建，它将是不可改变的，所有的String类中方法并不是改变String对象自己，而是重新创建一个新的String对象。
+			也就是说c1=han，并不是改变了原有对象的值，而是创建了一个新的字符串对象，这个对象的值是han，并把这个对象的引用赋值给了c1。
+        	所以c1==c3 为false
+        	
+        	正因为String对象的不可变性，如果需要对字符串进行大量的修改、添加字符、删除字符等操作尽量不要使用String对象，因为这样会频繁的创建新的对象导致程序的执行效率下降
+			这时我们可以使用字符串生成器StringBuilder
+
+String、StringBuffer、StringBuilder区别
+	源码层面分析：
+		 /** The value is used for character storage. */
+    		private final char value[];
+    	String类是依赖一个私有字符常量表实现的
+    	String为字符串常量，即String对象一旦创建之后该对象是不可更改的，但后两者的对象是变量，是可以更改的
+    	 /**
+    	 * The value is used for character storage.
+    	 */
+    	char[] value;
+    	StringBuffer与StringBuilder都是继承AbstractStringBuilder，然而AbstractStringBuilder类是依赖一个字符变量表实现的
+    	StringBuilder和StringBuffer的对象是变量，对变量进行操作就是直接对该对象进行更改，而不进行创建和回收的操作，所以速度要比String快很多
+    	
+    	在线程安全上，StringBuilder是线程不安全的，而StringBuffer是线程安全的
+    	如果一个StringBuffer对象在字符串缓冲区被多个线程使用时，StringBuffer中很多方法可以带有synchronized关键字，所以可以保证线程是安全的，但StringBuilder的方法则没有该关键字，所以不能保证线程安全，有可能会出现一些错误的操作。
+    	所以如果要进行的操作是多线程的，那么就要使用StringBuffer，但是在单线程的情况下，还是建议使用速度比较快的StringBuilder。
+    	
+自动拆装箱  不知道
+
+
+Integer的缓存机制  不知道
+
+熟悉Java中各种关键字   了解部分  大部分不清楚
+transient、instanceof、volatile、synchronized、final、static、const 原理及用法。
+
+集合类
+常用集合类的使用
+ArrayList和LinkedList和Vector的区别  不知道
+SynchronizedList和Vector的区别   不知道
+HashMap、HashTable、ConcurrentHashMap区别  了解并掌握hashmap
+Java 8中stream相关用法  见过
+apache集合处理工具类的使用   不知道
+
+不同版本的JDK中HashMap的实现的区别以及原因   清楚jdk1.7和jdk1.8的区别和原因
+1.8中应用了红黑树的数据结构   在链表节点超过8个的时候自动转换为红黑树结构  当红黑树的节点减少到6个时  自动转换为链表结构
+
+枚举
+枚举的用法、枚举与单例、Enum类 已整理
+
+Java IO&Java NIO，并学会使用    不知道不会用
+bio、nio和aio的区别、三种IO的用法与原理、netty
+
+Java反射与javassist    不清楚
+反射与工厂模式、 java.lang.reflect.*
+
+Java序列化    没接触
+什么是序列化与反序列化、为什么序列化
+序列化底层原理
+序列化与单例模式
+protobuf
+为什么说序列化并不安全
+
+注解  没接触
+元注解、自定义注解、Java中常用注解使用、注解与反射的结合
+
+JMS 没接触
+什么是Java消息服务、JMS消息传送模型
+
+JMX  没见过
+java.lang.management.*、 javax.management.*
+
+泛型   表面了解
+泛型与继承
+类型擦除
+泛型中K T V E  
+object等的含义、泛型各种用法
+
+单元测试  没玩儿过
+junit、mock、mockito、内存数据库（h2）
+
+正则表达式  知道  但不会用
+java.lang.util.regex.*
+
+常用的Java工具库  用过其中一个
+commons.lang, commons.*... guava-libraries netty
+
+什么是API&SPI  不知道
+
+异常  了解  但不会用
+异常类型、正确处理异常、自定义异常
+
+时间处理  没用过
+时区、时令、Java中时间API
+
+编码方式  了解但不会用
+解决乱码问题、常用编码方式
+
+语法糖 不知道
+Java中语法糖原理、解语法糖
+
+Java并发编程  表面了解
+什么是线程，与进程的区别
+
+阅读源代码，并学会使用   没读过
+Thread、Runnable、Callable、ReentrantLock、ReentrantReadWriteLock、Atomic*、Semaphore、CountDownLatch、、ConcurrentHashMap、Executors
+
+线程池  没用过
+自己设计线程池、submit() 和 execute()
+
+线程安全  不清楚
+死锁、死锁如何排查、Java线程调度、线程安全和内存模型的关系
+
+锁 了解一部分
+CAS、乐观锁与悲观锁、数据库相关锁机制、分布式锁、偏向锁、轻量级锁、重量级锁、monitor、锁优化、锁消除、锁粗化、自旋锁、可重入锁、阻塞锁、死锁
+
+死锁  了解
+volatile
+happens-before、编译器指令重排和CPU指令重
+
+synchronized  不是很明白
+synchronized是如何实现的？
+synchronized和lock之间关系
+不使用synchronized如何实现一个线程安全的单例
+sleep 和 wait
+wait 和 notify
+notify 和 notifyAll
+
+ThreadLocal  不知道
+写一个死锁的程序
+
+写代码来解决生产者消费者问题  不会写只知道
+
+守护线程  不知道
+守护线程和非守护线程的区别以及用法  不知道
