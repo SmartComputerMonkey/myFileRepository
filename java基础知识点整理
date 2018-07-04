@@ -28,8 +28,9 @@ jps, jstack, jmap、jstat, jconsole, jinfo, jhat, javap, btrace、TProfiler
 javac 、javap 、jad 、CRF
 
 Java基础知识
-阅读源代码  没读过
-String、Integer、Long、Enum、BigDecimal、ThreadLocal、ClassLoader & URLClassLoader、ArrayList & LinkedList、 HashMap & LinkedHashMap & TreeMap & CouncurrentHashMap、HashSet & LinkedHashSet & TreeSet
+阅读源代码  
+String、Integer、Long、Enum、BigDecimal、ThreadLocal、ClassLoader & URLClassLoader、
+ArrayList & LinkedList、 HashMap & LinkedHashMap & TreeMap & CouncurrentHashMap、HashSet & LinkedHashSet & TreeSet
 
 Java中各种变量类型  没看过
 
@@ -142,20 +143,87 @@ String、StringBuffer、StringBuilder区别
     	如果一个StringBuffer对象在字符串缓冲区被多个线程使用时，StringBuffer中很多方法可以带有synchronized关键字，所以可以保证线程是安全的，但StringBuilder的方法则没有该关键字，所以不能保证线程安全，有可能会出现一些错误的操作。
     	所以如果要进行的操作是多线程的，那么就要使用StringBuffer，但是在单线程的情况下，还是建议使用速度比较快的StringBuilder。
     	
-自动拆装箱  不知道
+自动拆装箱:自动装箱就是Java自动将原始类型值转换成对应的对象，比如将int的变量转换成Integer对象，这个过程叫做装箱，反之将Integer对象转换成int类型值，这个过程叫做拆箱。
+		因为这里的装箱和拆箱是自动进行的非人为转换，所以就称作为自动装箱和拆箱.
+java为什么要引入自动装箱和拆箱的功能？
+	主要是用于java集合中，List<Inteter> list=new ArrayList<Integer>();
+	list集合如果要放整数的话，只能放对象，不能放基本类型，因此需要将整数自动装箱成对象,基本数据类型，
+	如int,float,double,boolean,char,byte,不具备对象的特征，不能调用方法。
+例子：
+	装箱：将基本类型转换成包装类对象
+	int i=10;
+	Integer x=new Integer(i);手动装箱
+	Integer y=10;自动装箱
+	Integer的缓存机制  不知道
+	
+	拆箱：将包装类对象转换成基本类型的值
+	Integer j=new Integer(8);
+	int m=j.intValue();//手动拆箱
+	int n=j;//自动拆箱
+注意点(弊端):
+	容易生成无用对象,因为自动装箱会隐式地创建对象，像前面提到的那样，如果在一个循环体中，会创建无用的中间对象，这样会增加GC压力，拉低程序的性能。
+	所以在写循环时一定要注意代码，避免引入不必要的自动装箱操作.
 
+Integer的缓存机制
+	Java 编译器把原始类型自动转换为封装类的过程称为自动装箱（autoboxing），这相当于调用 valueOf 方法
+	 JDK 源码中对应实现的部分在哪里了。我们来看看 valueOf 的源码。下面是 JDK 1.8.0 build 25 中的代码
+	 	public static Integer valueOf(int i) {
+       		if (i &amp;gt;= IntegerCache.low &amp;amp;&amp;amp; i &amp;lt;= IntegerCache.high)
+           		return IntegerCache.cache[i + (-IntegerCache.low)];
+       		
+       		return new Integer(i);
+   		}
+   	在创建新的 Integer 对象之前会先在 IntegerCache.cache 中查找。有一个专门的 Java 类来负责 Integer 的缓存
+   	这个类是用来实现缓存支持，并支持 -128 到 127 之间的自动装箱过程。
+   	最大值 127 可以通过 JVM 的启动参数 -XX:AutoBoxCacheMax=size 修改。
+   	缓存通过一个 for 循环实现。从小到大的创建尽可能多的整数并存储在一个名为 cache 的整数数组中。
+   	这个缓存会在 Integer 类第一次被使用的时候被初始化出来。
+   	以后，就可以使用缓存中包含的实例对象，而不是创建一个新的实例(在自动装箱的情况下)。
+   	
+   	实际上在 Java 5 中引入这个特性的时候，范围是固定的 -128 至 +127。
+   	后来在 Java 6 中，最大值映射到 java.lang.Integer.IntegerCache.high，可以使用 JVM 的启动参数设置最大值。
+   	这使我们可以根据应用程序的实际情况灵活地调整来提高性能。是什么原因选择这个 -128 到 127 这个范围呢？因为这个范围的整数值是使用最广泛的。 
+   	在程序中第一次使用 Integer 的时候也需要一定的额外时间来初始化这个缓存
+   	
+   	这种缓存行为不仅适用于Integer对象。我们针对所有整数类型的类都有类似的缓存机制。
 
-Integer的缓存机制  不知道
+	有 ByteCache 用于缓存 Byte 对象
+	有 ShortCache 用于缓存 Short 对象
+	有 LongCache 用于缓存 Long 对象
+	有 CharacterCache 用于缓存 Character 对象
+	Byte，Short，Long 有固定范围: -128 到 127。对于 Character, 范围是 0 到 127。除了 Integer 可以通过参数改变范围外，其它的都不行。
 
 熟悉Java中各种关键字   了解部分  大部分不清楚
-transient、instanceof、volatile、synchronized、final、static、const 原理及用法。
+	transient、instanceof、volatile、synchronized、final、static、const 原理及用法。
 
 集合类
 常用集合类的使用
-ArrayList和LinkedList和Vector的区别  不知道
+ArrayList和LinkedList和Vector的区别: 
+	Vector&ArrayList简介及特点
+		1、Vector是内部是以动态数组的形式来存储数据的。
+		2、Vector具有数组所具有的特性、通过索引支持随机访问、所以通过随机访问Vector中的元素效率非常高、但是执行插入、删除时效率比较地下、具体原因后面有分析。
+		3、Vector实现了AbstractList抽象类、List接口、所以其更具有了AbstractList和List的功能、前面我们知道AbstractList内部已经实现了获取Iterator和ListIterator的方法、所以Vector只需关心对数组操作的方法的实现、
+		4、Vector实现了RandomAccess接口、此接口只有声明、没有方法体、表示Vector支持随机访问。
+		5、Vector实现了Cloneable接口、此接口只有声明、没有方法体、表示Vector支持克隆。
+		6、Vector实现了Serializable接口、此接口只有声明、没有方法体、表示Vector支持序列化、即可以将Vector以流的形式通过ObjectOutputStream来写入到流中。
+		7、Vector由于使用了synchronized方法-线程安全，所以性能上比ArrayList要差,所以Vector是线程安全的。
+	LinkedList的特点：
+		是一个双链表，在add和remove时比ArrayList性能好，但get和set时就特别慢了。
+		双向链表，链表的一种。每个数据结点中都有两个指针，分别指向直接前驱和直接后继。因此，我们可以方便的访问他的前驱结点和后继结点。
+		特点： 
+		 1、 LinkedList以链表的形式存储数据、对增删元素有很高的效率、查询效率较低、尤其是随机访问、效率不忍直视、
+       	 2、 LinkedList继承AbstractSequentialdList（其继承与AbstractList、所以要求其子类要实现通过索引操作元素）、使得LinkedList支持使用索引的“增删改查”操作、
+         3、LinkedList直接实现了List接口、使其可以内部存储元素有序并且为每个元素提供索引值、
+         4、LinkedList直接实现了Deque接口、Deque接口继承了Queue、使其可以作为双向链表这种数据结构来使用、操作元素、
+         5、LinkedList直接实现了Cloneable接口、使其可以复制其中的全部元素
+         6、在使用ObjectOutputStream/ObjectInputStream流时、会先讲LinkedList的capacity读取/写入到流中、然后将元素一一读取/写入。
+
 SynchronizedList和Vector的区别   不知道
+
 HashMap、HashTable、ConcurrentHashMap区别  了解并掌握hashmap
+
 Java 8中stream相关用法  见过
+
 apache集合处理工具类的使用   不知道
 
 不同版本的JDK中HashMap的实现的区别以及原因   清楚jdk1.7和jdk1.8的区别和原因
@@ -164,7 +232,8 @@ apache集合处理工具类的使用   不知道
 枚举
 枚举的用法、枚举与单例、Enum类 已整理
 
-Java IO&Java NIO，并学会使用    不知道不会用
+Java IO&Java NIO，并学会使用    
+
 bio、nio和aio的区别、三种IO的用法与原理、netty
 
 Java反射与javassist    不清楚
