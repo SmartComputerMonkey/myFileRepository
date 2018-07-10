@@ -193,9 +193,63 @@ Integer的缓存机制
 	有 CharacterCache 用于缓存 Character 对象
 	Byte，Short，Long 有固定范围: -128 到 127。对于 Character, 范围是 0 到 127。除了 Integer 可以通过参数改变范围外，其它的都不行。
 
-熟悉Java中各种关键字   了解部分  大部分不清楚
+熟悉Java中各种关键字
 	transient、instanceof、volatile、synchronized、final、static、const 原理及用法。
 
+	transient原理及用法：
+        定义： transient是Java语言的关键字，用来表示一个域不是该对象串行化的一部分。当一个对象被串行化的时候，transient型变量的值不包括在串行化的表示中，然而非transient型的变量是被包括进去的。
+        作用： Java的serialization提供了一种持久化对象实例的机制。当持久化对象时，可能有一个特殊的对象数据成员，我们不想用serialization机制来保存它。为了在一个特定对象的一个域上关闭serialization，可以在这个域前加上关键字transient。
+	instanceof原理及用法：
+	    用法表达式：
+	        result = object instanceof class
+               result：布尔类型。
+               object：必选项。任意对象表达式。
+               class：必选项。任意已定义的对象类。
+        原理：
+            检测object对象是不是class类型的实例的原理是：class类型是否在object类型的原型链上，如果在result为true，如果不在为false;
+	synchronized原理及用法：
+	    用法：1、修饰普通方法 2、修饰静态方法 3、修饰代码块
+	    作用：（1）确保线程互斥的访问同步代码（2）保证共享变量的修改能够及时可见（3）有效解决重排序问题
+	final原理及用法：
+            基本用法：
+                1、用来修饰类
+                        当用final修饰一个类时，表明这个类不能被继承。
+                        也就是说，如果一个类你永远不会让他被继承，就可以用final进行修饰。
+                        final类中的成员变量可以根据需要设为final，但是要注意final类中的所有成员方法都会被隐式地指定为final方法。
+                2、方法
+                     使用final方法的原因有两个，第一个原因是把方法锁定，以防任何继承类修改它的含义；第二个原因是效率。在早期的Java实现版本中，会将final方法转为内嵌调用
+                     如果只有在想明确禁止 该方法在子类中被覆盖的情况下才将方法设置为final的。
+                     注：类的private方法会隐式地被指定为final方法。
+                3、变量（包括成员变量和局部变量）
+                    对于一个final变量，如果是基本数据类型的变量，则其数值一旦在初始化之后便不能更改；
+                    如果是引用类型的变量，则在对其初始化之后便不能再让其指向另一个对象。
+	static原理及用法：
+	    用法：
+	        是一个修饰符，用于修饰成员（成员变量，成员函数），
+            当成员被静态修饰后，就多了一个调用方式，除了可以被对象调用外，
+            还可以直接被类名调：类名.静态成员
+        存在：方法区，共享区，数据区（非堆内存、栈内存的另一个存储区），Static 块仅在该类被加载时执行一次。
+        特点：
+            1，随着类的加载而加载，也就是说静态会随着类的消失而消失，说明他的生命周期最长
+            2，优先于对象的存在。（静态先存在，对象后存在。）
+            3，被所有对象所共享
+            4，可以直接被类名调用
+            由于静态static不依赖于任何对象就可以进行访问，因此对于静态来说，是没有this的，因为它不依附于任何对象，既然都没有对象，就谈不上this了。
+            并且由于这个特性，在静态方法中不能访问类的非静态成员变量和非静态成员方法，因为非静态成员方法/变量都是必须依赖具体的对象才能够被调用。
+
+            内部类中不能存在static修饰的成员，因为static随着类加载产生，内部类依附于宿主类，系统加载：宿主类-->静态-->内部类，而内部类的静态是随着内部类加载产生，与加载类就加载static矛盾，所以内部类中不能存在static修饰
+	实例变量和类变量的区别：
+	        1，存放位置。
+            　　类变量随着类的加载而存在于方法区中。
+            　　实例变量随着对象的建立而存在于堆内存中。
+            2，生命周期：
+            　　类变量生命周期最长，随着类的消失而消失。
+            　　实例变量生命周期随着对象的消失而消失。
+    注意：
+        1，静态方法只能访问静态成员，非静态方法既可以访问静态也可以访问非静态。（Java虚拟机（JVM）加载类时，就会执行该static，静态优先于其他产生对象产生）。
+        2，静态方法中不可定义this，super等关键字：
+        　　　　（this:this代表当前对象，static于类加载的时候存在优先于实例对象的产生，static调用非静态时并未产生对象，所以this不代表任何对象为null,未进行初始化操作。）
+        3，主函数是静态方法。
 集合类
 常用集合类的使用
 ArrayList和LinkedList和Vector的区别: 
@@ -270,6 +324,46 @@ java.lang.util.regex.*
 常用的Java工具库  用过其中一个
 commons.lang, commons.*... guava-libraries netty
 
+guava-libraries 源码包的简单说明：
+　　com.google.common.annotations：普通注解类型。
+　　com.google.common.base：基本工具类库和接口。
+　　com.google.common.cache：缓存工具包，非常简单易用且功能强大的JVM内缓存。
+　　com.google.common.collect：带泛型的集合接口扩展和实现，以及工具类，这里你会发现很多好玩的集合。
+　　com.google.common.eventbus：发布订阅风格的事件总线。
+　　com.google.common.hash： 哈希工具包。
+　　com.google.common.io：I/O工具包。
+　　com.google.common.math：原始算术类型和超大数的运算工具包。
+　　com.google.common.net：网络工具包。
+　　com.google.common.primitives：八种原始类型和无符号类型的静态工具包。
+　　com.google.common.reflect：反射工具包。
+　　com.google.common.util.concurrent：多线程工具包。
+类库使用手册：
+　　一.  基本工具类：让使用Java语言更令人愉悦。
+    　　1. 使用和避免 null：null 有语言歧义， 会产生令人费解的错误， 反正他总是让人不爽。很多 Guava 的工具类在遇到 null 时会直接拒绝或出错，而不是默默地接受他们。
+    　　2. 前提条件：更容易的对你的方法进行前提条件的测试。
+    　　3. 常见的对象方法： 简化了Object常用方法的实现， 如 hashCode() 和 toString()。
+    　　4. 排序： Guava 强大的 "fluent Comparator"比较器， 提供多关键字排序。
+    　　5. Throwable类： 简化了异常检查和错误传播。
+　　二.  集合类：集合类库是 Guava 对 JDK 集合类的扩展， 这是 Guava 项目最完善和为人所知的部分。
+    　　1. Immutable collections（不变的集合）： 防御性编程， 不可修改的集合，并且提高了效率。
+    　　2. New collection types(新集合类型)：JDK collections 没有的一些集合类型，主要有：multisets，multimaps，tables， bidirectional maps等等
+    　　3. Powerful collection utilities（强大的集合工具类）： java.util.Collections 中未包含的常用操作工具类
+    　　4. Extension utilities（扩展工具类）: 给 Collection 对象添加一个装饰器? 实现迭代器? 我们可以更容易使用这些方法。
+　　三.  缓存: 本地缓存，可以很方便的操作缓存对象，并且支持各种缓存失效行为模式。
+　　四.  Functional idioms（函数式）: 简洁, Guava实现了Java的函数式编程，可以显著简化代码。
+　　五. Concurrency（并发）：强大,简单的抽象,让我们更容易实现简单正确的并发性代码。
+    　　1. ListenableFuture（可监听的Future）: Futures,用于异步完成的回调。
+    　　2. Service: 控制事件的启动和关闭，为你管理复杂的状态逻辑。
+
+　　六. Strings: 一个非常非常有用的字符串工具类: 提供 splitting，joining， padding 等操作。
+　　七. Primitives: 扩展 JDK 中未提供的对原生类型（如int、char等）的操作， 包括某些类型的无符号的变量。
+　　八. Ranges: Guava 一个强大的 API，提供 Comparable 类型的范围处理， 包括连续和离散的情况。
+　　九. I/O: 简化 I/O 操作, 特别是对 I/O 流和文件的操作, for Java 5 and 6.
+　　十. Hashing: 提供比 Object.hashCode() 更复杂的 hash 方法, 提供 Bloom filters.
+　　十一. EventBus: 基于发布-订阅模式的组件通信，但是不需要明确地注册在委托对象中。
+　　十二. Math: 优化的 math 工具类，经过完整测试。
+
+　　十三. Reflection: Guava 的 Java 反射机制工具类。
 什么是API&SPI  不知道
 
 异常  了解  但不会用
@@ -285,7 +379,9 @@ commons.lang, commons.*... guava-libraries netty
 Java中语法糖原理、解语法糖
 
 Java并发编程  表面了解
-什么是线程，与进程的区别
+什么是线程，与进程的区别：
+    一个程序最少需要一个进程，而一个进程最少需要一个线程。关系是线程–>进程–>程序的大致组成结构。
+    所以线程是程序执行流的最小单位，而进程是系统进行资源分配和调度的一个独立单位。
 
 阅读源代码，并学会使用   没读过
 Thread、Runnable、Callable、ReentrantLock、ReentrantReadWriteLock、Atomic*、Semaphore、CountDownLatch、、ConcurrentHashMap、Executors
@@ -300,21 +396,86 @@ Thread、Runnable、Callable、ReentrantLock、ReentrantReadWriteLock、Atomic*、Sema
 CAS、乐观锁与悲观锁、数据库相关锁机制、分布式锁、偏向锁、轻量级锁、重量级锁、monitor、锁优化、锁消除、锁粗化、自旋锁、可重入锁、阻塞锁、死锁
 
 死锁  了解
+happens-before、编译器指令重排和CPU指令重排
+
 volatile
-happens-before、编译器指令重排和CPU指令重
+synchronized
+定义：
+    Java语言的关键字，可用来给对象和方法或者代码块加锁，当它锁定一个方法或者一个代码块的时候，同一时刻最多只有一个线程执行这段代码
 
-synchronized  不是很明白
-synchronized是如何实现的？
+synchronized是如何实现的 已总结
+
 synchronized和lock之间关系
+本质区别：
+    synchronized是基于jvm底层实现的数据同步，lock是基于Java编写，主要通过硬件依赖CPU指令实现数据同步
+    类别	               synchronized	                                                                            Lock
+    存在层次	           Java的关键字，在jvm层面上	                                                            是一个类
+    锁的释放	           1、以获取锁的线程执行完同步代码，释放锁 2、线程执行发生异常，jvm会让线程释放锁	        在finally中必须释放锁，不然容易造成线程死锁
+    锁的获取	           假设A线程获得锁，B线程等待。如果A线程阻塞，B线程会一直等待	                            分情况而定，Lock有多个锁获取的方式，具体下面会说道，大致就是可以尝试获得锁，线程可以不用一直等待
+    锁状态	               无法判断	                                                                                可以判断
+    锁类型	               可重入 不可中断 非公平	                                                                可重入 可判断 可公平（两者皆可）
+    性能	               少量同步	                                                                                大量同步
+两种锁的实现方式：
+    synchronized是悲观锁，它胆子很小，它很怕有人和它抢吃的，所以它每次吃东西前都把自己关起来
+    lock是乐观锁机制，它无所谓，别人抢了它吃的，它重新去拿吃的就好啦，所以它很乐观
+尽可能去使用synchronized而不要去使用LOCK
+了解Thread的几个重要方法：
+    a、start()方法，调用该方法开始执行该线程；
+    b、stop()方法，调用该方法强制结束该线程执行；
+    c、join方法，调用该方法等待该线程结束。
+    d、sleep()方法，调用该方法该线程进入等待。
+    e、run()方法，调用该方法直接执行线程的run()方法，但是线程调用start()方法时也会运行run()方法，区别就是一个是由线程调度运行run()方法，一个是直接调用了线程中的run()方法
+    其实wait()与notify()方法是Object的方法，不是Thread的方法！！同时，wait()与notify()会配合使用，分别表示线程挂起和线程恢复
+    wait()与sleep()的区别，简单来说wait()会释放对象锁而sleep()不会释放对象锁
+notify 和 notifyAll：
+    被wait的线程，想要继续运行的话，它必须满足2个条件：
+    由其他线程notify或notifyAll了，并且当前线程被通知到了
+    经过和其他线程进行锁竞争，成功获取到锁了
+    2个条件，缺一不可。
+    其实在实现层面，notify和notifyAll都达到相同的效果，都只会有一个线程继续运行。
+    但notifyAll免去了，线程运行完了通知其他线程的必要，因为已经通知过了。
+    什么时候用notify，什么时候使用notifyAll，这就得看实际的情况了
+
+Lock接口中的方法解释：
+    lock()：获取锁，如果锁被暂用则一直等待
+    unlock():释放锁
+    tryLock(): 注意返回类型是boolean，如果获取锁的时候锁被占用就返回false，否则返回true
+    tryLock(long time, TimeUnit unit)：比起tryLock()就是给了一个时间期限，保证等待参数时间
+    lockInterruptibly()：用该锁的获得方式，如果线程在获取锁的阶段进入了等待，那么可以中断此线程，先去做别的事
+
 不使用synchronized如何实现一个线程安全的单例
-sleep 和 wait
-wait 和 notify
-notify 和 notifyAll
 
-ThreadLocal  不知道
-写一个死锁的程序
+    public class Singleton {
+        private static final AtomicReference<Singleton> INSTANCE = new AtomicReference<Singleton>();
 
-写代码来解决生产者消费者问题  不会写只知道
+        private Singleton() {}
+
+        public static Singleton getInstance() {
+            for (;;) {
+                Singleton singleton = INSTANCE.get();
+                if (null != singleton) {
+                    return singleton;
+                }
+
+                singleton = new Singleton();
+                if (INSTANCE.compareAndSet(null, singleton)) {
+                    return singleton;
+                }
+            }
+        }
+
+
+
+ThreadLocal
+
+写一个死锁的程序 会写
+
+写代码来解决生产者消费者问题
+优点：
+    它简化的开发，你可以独立地或并发的编写消费者和生产者，它仅仅只需知道共享对象是谁
+    生产者不需要知道谁是消费者或者有多少消费者，对消费者来说也是一样
+    生产者和消费者可以以不同的速度执行
+    分离的消费者和生产者在功能上能写出更简洁、可读、易维护的代码
 
 守护线程  不知道
 守护线程和非守护线程的区别以及用法  不知道
