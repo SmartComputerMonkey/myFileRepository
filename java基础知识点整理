@@ -315,7 +315,7 @@ java.lang.management.*、 javax.management.*
 泛型中K T V E  
 object等的含义、泛型各种用法
 
-单元测试  没玩儿过
+单元测试
 junit、mock、mockito、内存数据库（h2）
 
 正则表达式  知道  但不会用
@@ -366,7 +366,7 @@ guava-libraries 源码包的简单说明：
 　　十三. Reflection: Guava 的 Java 反射机制工具类。
 什么是API&SPI  不知道
 
-异常  了解  但不会用
+异常
 异常类型、正确处理异常、自定义异常
 
 时间处理  没用过
@@ -463,9 +463,6 @@ Lock接口中的方法解释：
                 }
             }
         }
-
-
-
 ThreadLocal
 
 写一个死锁的程序 会写
